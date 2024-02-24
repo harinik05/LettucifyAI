@@ -141,7 +141,34 @@ class Model_Training_Sequence:
         
         else:
             self.logger.info(f"Not running in multinode")
-            
+        
+
+        # Check if its the main node when rank = 0 (report from main process to avoid conflicts with distribution)
+        if self.self_is_main_node:
+            mlflow.log_params(
+                {
+                    # log some distribution params
+                    "nodes": self.world_size // self.local_world_size,
+                    "instance_per_node": self.local_world_size,
+                    "cuda_available": torch.cuda.is_available(),
+                    "cuda_device_count": torch.cuda.device_count(),
+                    "distributed": self.multinode_available,
+                    "distributed_backend": self.distributed_backend,
+                    # data loading params
+                    "batch_size": self.dataloading_config.batch_size,
+                    "num_workers": self.dataloading_config.num_workers,
+                    "prefetch_factor": self.dataloading_config.prefetch_factor,
+                    "pin_memory": self.dataloading_config.pin_memory,
+                    "non_blocking": self.dataloading_config.non_blocking,
+                    # training params
+                    "model_arch": self.training_config.model_arch,
+                    "model_arch_pretrained": self.training_config.model_arch_pretrained,
+                    "learning_rate": self.training_config.learning_rate,
+                    "num_epochs": self.training_config.num_epochs,
+                    # profiling params
+                    "enable_profiling": self.training_config.enable_profiling,
+                }
+            )
 
 
     
