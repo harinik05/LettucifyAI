@@ -68,9 +68,25 @@ class Model_Training_Sequence:
         self.profiler = None 
         self.profiler_output_tmp_dir = None 
 
-    # Setup Configuration Function 
-    def setup_config(self, args):
-        
+    # Setup Configuration Function
+    '''
+    Number of workers: Refers to the number of worker processes that can be running for 
+    data loading and training config job. If more than 0, then this will run paralleling 
+    using multiple CPU cores to load data concurrently. 
+    '''
+    def setup_configuration(self, args):
+        self.dataloading_config = args
+        self.training_config = args 
+
+        # Verify the parameter number of workers 
+        if self.dataloading_config.num_workers is None:
+            self.dataloading_config.num_workers = 0
+        if self.dataloading_config.num_workers < 0:
+            self.dataloading_config.num_workers = os.cpu_count()
+        if self.dataloading_config.num_workers == 0:
+            self.logger.warning("The number of workers is 0")
+            self.dataloading_config.num_workers = None
+
 
     
 
