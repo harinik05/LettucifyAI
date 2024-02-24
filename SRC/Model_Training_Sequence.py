@@ -119,7 +119,29 @@ class Model_Training_Sequence:
         else:
             raise NotImplementedError(f"the distributed backend {self.distributed_backend} is not implemented")
         
+        # Check if CUDA is available for runnning PyTorch activities 
+        if torch.cuda.is_available():
+            self.logger.info(f"Setting up the torch.device for CUDA for local gpu: {self.local_rank}")
+            self.device = torch.device(self.local_rank)
+        
+        else:
+            self.logger.info(f"setting up torch.device for cpu")
+            self.device = torch.device("cpu")
+        
+        # Check if the multinode optinon is available 
+        if self.multinode_available:
+            self.logger.info(f"Running in multinode with backend = {self.distributed_backend}, local_rank = {self.local_rank}, rank = {self.world_rank}, size = {self.world_size}")
 
+            # Initializes the pytorch backend
+            torch.distributed.init_process_group(
+                self.distributed_backend,
+                rank = self.world_rank,
+                world_size = self.world_size,
+            )
+        
+        else:
+            self.logger.info(f"Not running in multinode")
+            
 
 
     
