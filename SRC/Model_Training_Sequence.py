@@ -87,6 +87,40 @@ class Model_Training_Sequence:
             self.logger.warning("The number of workers is 0")
             self.dataloading_config.num_workers = None
 
+        self.dataloading_config.pin_memory = bool(self.dataloading_config.pin_memory)
+        self.dataloading_config.non_blocking = bool(self.dataloading_config.non_blocking)
+
+
+        # Distributed: detect multinode config depending on Azure ML distribution type for DistributedDataParallel 
+        self.distributed_backend = args.distributed_backend
+        '''
+        NCCL = NVIDIA Collective Communication Library for training across 
+        multiple GPUs across a single node or across multiple nodes with GPUs
+        from NVIDIA 
+
+        MPI = Message Passing Interface for distributed computing
+        '''
+        if self.distributed_backend == "nccl":
+            self.world_size = int(os.environ.get("WORLD_SIZE","1"))
+            self.world_rank  =int(os.environ.get("RANK","0"))
+            self.local_world_size = int(os.environ.get("LOCAL_WORLD_SIZE", "1"))
+            self.local_rank = int(os.environ.get("LOCAL_RANK","0"))
+            self.multinode_available = self.world_size>1
+            self.self_is_main_node = self.world_rank == 0
+        
+        elif self.distributed_backend == "mpi":
+            self.world_size = int(os.environ.get("OMPI_COMM_WORLD_SIZE","1"))
+            self.world_rank = int(os.environ.get("OMPI_COMM_WORLD_RANK","0"))
+            self.local_world_size = int(os.environ.get("OMPI_COMM_WORLD_LOCAL_SIZE","1"))
+            self.local_rank = int(os.environ.get("OMPI_COMM_WORLD_LOCAL_RANK", 0))
+            self.multinode_available = self.world_size>1
+            self.self_is_main_node = self.world_rank==0
+
+        else:
+            raise NotImplementedError(f"the distributed backend {self.distributed_backend} is not implemented")
+        
+
+
 
     
 
