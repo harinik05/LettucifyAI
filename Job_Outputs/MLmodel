@@ -1,0 +1,16 @@
+artifact_path: food-classification-model
+flavors:
+  python_function:
+    data: data
+    env: conda.yaml
+    loader_module: mlflow.pytorch
+    pickle_module_name: mlflow.pytorch.pickle_module
+    python_version: 3.7.13
+  pytorch:
+    code: null
+    model_data: data
+    pytorch_version: 1.9.0
+mlflow_version: 1.30.0
+model_uuid: 44568ee7fb3d42e0a872b34ff4337d7b
+run_id: teal_market_mpkbjj7gmb
+utc_time_created: '2024-02-13 02:36:41.206813'

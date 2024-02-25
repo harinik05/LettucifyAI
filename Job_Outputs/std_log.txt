@@ -1,0 +1,12 @@
+/azureml-envs/pytorch-1.9/lib/python3.7/site-packages/torch/nn/functional.py:718: UserWarning: Named tensors and all their associated APIs are an experimental feature and subject to change. Please do not use them for anything important until they are released as stable. (Triggered internally at  /opt/conda/conda-bld/pytorch_1623448265233/work/c10/core/TensorImpl.h:1156.)
+  return torch.max_pool2d(input, kernel_size, stride, padding, dilation, ceil_mode)
+/azureml-envs/pytorch-1.9/lib/python3.7/site-packages/_distutils_hack/__init__.py:30: UserWarning: Setuptools is replacing distutils.
+  warnings.warn("Setuptools is replacing distutils.")
+data=/mnt/azureml/cr/j/4e706942981f45ba91a5833f02732b4b/cap/data-capability/wd/INPUT_data test_root=/mnt/azureml/cr/j/4e706942981f45ba91a5833f02732b4b/cap/data-capability/wd/INPUT_test_root test_train_ratio=0.2 registered_model_name=food-classification-model
+input data: /mnt/azureml/cr/j/4e706942981f45ba91a5833f02732b4b/cap/data-capability/wd/INPUT_data
+Epoch 1, Training Loss: 20.2174
+Epoch 2, Training Loss: 7.2956
+Epoch 3, Training Loss: 3.4614
+Epoch 4, Training Loss: 2.7826
+Epoch 5, Training Loss: 2.7012
+Registering the model via MLFlow
