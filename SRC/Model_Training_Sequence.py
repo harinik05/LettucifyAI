@@ -226,9 +226,10 @@ class Model_Training_Sequence:
         return self.model 
     
     """
-    Epoch Evaluation: U
+    Epoch Evaluation: Method set to provide the images and calculate the loss and correctness once 
+    the model has been evaluated. 
     """
-    def __epoch_evaluate(Self, epoch, criterion):
+    def _epoch_evaluate(Self, epoch, criterion):
        # Disables the gradient option - speeds up computation 
        with torch.no_grad():
            
@@ -260,5 +261,67 @@ class Model_Training_Sequence:
 
                 return running_loss, num_correct, num_total_images
     
-    
+    """
+    Epoch Train: Sets the training process for the model and initializing 
+    the epoch count and other data params for the metrics calculation. 
+
+    """
+    def _epoch_train(self, epoch, optimizer, criterion):
+
+        # Setting the model to train mode to enable batch norm and dropout
+        self.model.train()
+
+        # Sets epoch count for the sampler 
+        self.training_data_sampler.set_epoch(epoch)
+
+        # Initializes the variables to begin with  
+        num_correct = 0
+        num_total_images = 0
+        running_loss = 0.0
+
+        # tqdm = progress = progress bar for loops and other information
+        for images, targets in tqdm(self.training_data_loader):
+            
+            # Moves the images and one hot encoded targets to the GPU device
+            with record_function("train.to_device"):
+                images = images.to(
+                    self.device, non_blocking=self.dataloading_config.non_blocking
+                )
+                one_hot_targets = torch.nn.functional.one_hot(
+                    targets.to(
+                        self.device, non_blocking=self.dataloading_config.non_blocking
+                    ),
+                    num_classes=len(self.labels),
+                ).float()
+            '''
+            1. design model - input, output, forward pass with different layers
+            2. construct loss and optimizer
+            3. training loop 
+                a. forward = compute prediction and loss
+                b. backward = compute gradients
+                c. update weights = use the optimizer
+                d. zero the gradients after applying the weight changes
+
+            '''
+            # Setting the train method to optain the predicted outputs
+            with record_function("train.forward"):
+                # zero the parameter gradients
+                optimizer.zero_grad()
+                
+                # Compare with the index of max value in predicted outputs in target labels
+                outputs = self.model(images)
+                loss = criterion(outputs, one_hot_targets)
+                correct = torch.argmax(outputs, dim=-1) == (targets.to(self.device))
+                
+                # All of these are accumulated
+                running_loss += loss.item() * images.size(0)
+                num_correct += torch.sum(correct).item()
+                num_total_images += len(images)
+
+            # Backpropagation step to find gradients of loss
+            with record_function("train.backward"):
+                loss.backward()
+                optimizer.step()
+
+        return running_loss, num_correct, num_total_images
     
