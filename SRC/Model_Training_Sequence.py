@@ -169,6 +169,67 @@ class Model_Training_Sequence:
                     "enable_profiling": self.training_config.enable_profiling,
                 }
             )
+    
+    """
+    Setup_Datasets: Use of distributed sampler 
+    """
+    def setup_datasets(self,training_dataset:torch.utils.data.Dataset,validation_dataset: torch.utils.data.Dataset, labels: list):
+        # Set up dataloaders for training and validation data
+        self.labels = labels 
+
+        # Use DistributedSampler to wrap ds
+        self.training_data_sampler = DistributedSampler(
+            training_dataset,num_replicas = self.world_size, rank = self.world_rank
+        )
+
+        # setting up dataloader with right arguments 
+        optional_data_loading_kwargs = {}
+
+        if self.dataloading_config.num_workers > 0:
+            optional_data_loading_kwargs["prefetch_factor"] = self.dataloading_config.prefetch_factor
+        
+        # Setting up the data loader
+        self.training_data_loader = DataLoader(
+            training_dataset,
+            batch_size = self.dataloading_config.batch_size,
+            num_workers = self.dataloading_config.num_workers,
+            pin_memory = self.dataloading_config.pin_memory,
+            sampler = self.training_data_sampler,
+            **optional_data_loading_kwargs,
+
+        )
+
+        # Setting validation data loader 
+        self.validation_data_loader = DataLoader(
+            validation_dataset,
+            batch_size = self.dataloading_config.batch_size,
+            num_workers = self.dataloading_config.num_workers,
+            pin_memory = self.dataloading_config.pin_memory,
+        )
+
+        # Logging the number of classes
+        if self.self_is_main_node:
+            mlflow.log_params({"num_classes: len(labels)"})
+   
+    """
+    Setup_Model: Use of distributed sampler 
+    """
+    def setup_model(self,model):
+        self.logger.info("setting the model up to use the device {self.device}")
+        self.model = model.to(self.device)
+
+        # Check the availability of the multinode configuration
+        if self.multinode_available:
+            self.logger.info(f"Setting up the model to use DistributedDataParallal")
+            self.model = torch.nn.parallel.DistributedDataParallel(self.model)
+        
+        return self.model 
+
+    
+
+
+        
+
 
 
     
