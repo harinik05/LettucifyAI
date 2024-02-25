@@ -224,14 +224,36 @@ class Model_Training_Sequence:
             self.model = torch.nn.parallel.DistributedDataParallel(self.model)
         
         return self.model 
-
     
+    """
+    Epoch Evaluation: U
+    """
+    def __epoch_evaluate(Self, epoch, criterion):
+       # Disables the gradient option - speeds up computation 
+       with torch.no_grad():
+           
+           # Keeps track of collective loss and predictions
+           num_correct = 0
+           num_total_images = 0
+           running_loss = 0.0
 
+            # iterates over batch of images and corresponding labels from dataloader
+           for images, targets in tqdm(self.validation_data_loader):
+                
+                # Moves the data to the GPU device first as images, then as one hot targets
+                with record_function("eval.to_device"):
+                   images = images.to(self.device, non_blocking = self.dataloading_config.non_blocking)
+                   one_hot_targets = targets.to(self.device, non_blocking = self.dataloading_config.non_blocking)
+            
+                # 
+                with record_function("eval.forward"):
+                   outputs = self.model(images)
+                   loss = criterion(outputs, one_hot_targets)
+                   running_loss += loss.item()*images.size(0)
 
-        
+                   correct = torch.argmax(outputs,dim=-1) == (targets.to(self.device))
+                   num_correct += torch.sum(correct).item()
+                   num_total_images += len(images)
 
-
-
+                return running_loss, num_correct, num_total_images
     
-
-
