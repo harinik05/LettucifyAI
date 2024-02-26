@@ -1,4 +1,3 @@
-%%writefile {train_src_dir}/Inference.py
 import torch
 import torchvision.transforms as transforms
 from PIL import Image
