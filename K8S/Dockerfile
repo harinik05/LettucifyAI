@@ -1,16 +1,17 @@
+# Use the official PyTorch image as the base image
 FROM pytorch/pytorch:latest
 
-# Copy your model file
-COPY your_model.pth /app/model.pth
+# Install Flask and Pillow (PIL) for image processing
+RUN pip install torch torchvision Pillow
 
-# Copy inference script
-COPY inference_script.py /app/inference_script.py
+# Create a directory for the application
+WORKDIR /K8S
 
-# Install any additional dependencies
-RUN pip install numpy
+# Copy the Python script and the model file
+COPY hello.py .
 
-# Set the working directory
-WORKDIR /app
+# Expose port 80 for the Flask application
+EXPOSE 80
 
-# Command to run inference script
-CMD ["python", "inference_script.py"]
+# Command to run the Flask application
+CMD ["python", "hello.py"]

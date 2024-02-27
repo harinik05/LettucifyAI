@@ -1,4 +1,5 @@
 import torch.nn as nn
+import torch
 
 class CNNModel(nn.Module):
     def __init__(self):
@@ -22,3 +23,13 @@ class CNNModel(nn.Module):
         x = x.view(x.size(0), -1)
         x = self.fc_layers(x)
         return x
+# Instantiate the model
+model = CNNModel()
+
+# Save the model to a .pth file
+torch.save(model.state_dict(), 'CNN.pth')
+
+# Load the model from the .pth file
+loaded_model = CNNModel()
+loaded_model.load_state_dict(torch.load('CNN.pth'))
+loaded_model.eval()  # Set the model to evaluation mode if needed

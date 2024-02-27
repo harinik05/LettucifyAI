@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blue-new-deployment1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: K8S
+  template:
+    metadata:
+      labels:
+        app: K8S
+    spec:
+      containers:
+      - name: hariniaks
+        image: hariniacr.azurecr.io/the_image:latest
+        ports:
+        - containerPort: 80
