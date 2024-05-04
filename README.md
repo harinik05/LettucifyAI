@@ -1,4 +1,4 @@
-# 🥝 LettucifyAI
+# 🥬 LettucifyAI 
 
 
 https://github.com/harinik05/LettucifyAI/assets/63025647/dc4534b5-e4e6-4969-87f1-a7e62533865c
